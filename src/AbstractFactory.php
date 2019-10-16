@@ -15,7 +15,6 @@ abstract class AbstractFactory
     private $times = 1;
     /** @var Recipe[] */
     private $recipes = [];
-    private $currentAttributes = [];
     private $cachedFillable = [];
 
     /**
@@ -105,7 +104,7 @@ abstract class AbstractFactory
 
     private function buildAttributes(Faker $faker, array $attributes): array
     {
-        $this->updateCurrentAttributes($built = []);
+        $currentAttributes = [];
 
         $recipes[] = new Recipe($this->default($faker));
         $recipes = array_merge($recipes, $this->recipes);
@@ -113,21 +112,16 @@ abstract class AbstractFactory
 
         /** @var Recipe[] $recipes */
         foreach ($recipes as $recipe) {
-            $this->updateCurrentAttributes(
-                $built = array_merge($built, $recipe->toAttribute($faker))
-            );
+            $cooked = $recipe->toAttribute($faker, $currentAttributes);
+
+            if ($this->shouldCheckFillable()) {
+                $this->checkAttributes($cooked);
+            }
+
+            $currentAttributes = array_merge($currentAttributes, $cooked);
         }
 
-        return $built;
-    }
-
-    private function updateCurrentAttributes(array $attributes): void
-    {
-        if ($this->shouldCheckFillable()) {
-            $this->checkAttributes($attributes);
-        }
-
-        $this->currentAttributes = $attributes;
+        return $currentAttributes;
     }
 
     private function checkAttributes(array $attributes): void
@@ -201,11 +195,6 @@ abstract class AbstractFactory
         return $this->shouldReturnMultiple()
             ? $built
             : $built[0];
-    }
-
-    final protected function currentAttributes(): array
-    {
-        return $this->currentAttributes;
     }
 
     /**

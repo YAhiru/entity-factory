@@ -26,12 +26,12 @@ final class Recipe
         $this->recipe = $recipe;
     }
 
-    public function toAttribute(Faker $faker): array
+    public function toAttribute(Faker $faker, array $currentAttributes): array
     {
         if (is_array($this->recipe)) {
             return $this->recipe;
         }
 
-        return ($this->recipe)($faker);
+        return ($this->recipe)($faker, $currentAttributes);
     }
 }

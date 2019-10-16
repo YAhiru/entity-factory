@@ -91,7 +91,7 @@ class FooEntityFactory extends AbstractFactory
 
     public function fakerRecipe(): self
     {
-        $this->addRecipe(function (Faker $faker) {
+        $this->addRecipe(function (Faker $faker, array $currentAttributes) {
             return [
                 'name' => $faker->name
             ];
