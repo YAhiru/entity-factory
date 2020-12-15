@@ -28,7 +28,7 @@
         "phpstan/phpstan": "^0.12.62",
         "codedungeon/phpunit-result-printer": "^0.30",
         "friendsofphp/php-cs-fixer": "^2.15",
-        "symfony/var-dumper": "^4.3",
+        "symfony/var-dumper": "^5.0",
         "infection/infection": "^0.13.6"
     },
     "scripts": {
