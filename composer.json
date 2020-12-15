@@ -29,7 +29,7 @@
         "codedungeon/phpunit-result-printer": "^0.30",
         "friendsofphp/php-cs-fixer": "^2.15",
         "symfony/var-dumper": "^5.0",
-        "infection/infection": "^0.13.6"
+        "infection/infection": "^0.20.0"
     },
     "scripts": {
         "stan": "vendor/bin/phpstan analyse",
