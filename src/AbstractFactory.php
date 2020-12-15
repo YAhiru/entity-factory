@@ -5,16 +5,20 @@ namespace Yahiru\EntityFactory;
 
 use Faker\Generator as Faker;
 use ReflectionClass;
+use ReflectionException;
 use Yahiru\EntityFactory\Exception\InvalidAttributeException;
 use Yahiru\EntityFactory\Exception\LogicException;
 use Yahiru\EntityFactory\Exception\OutOfRangeException;
 
 abstract class AbstractFactory
 {
+    /** @var string */
     protected $locale = 'en_US';
+    /** @var int */
     private $times = 1;
     /** @var Recipe[] */
     private $recipes = [];
+    /** @var array<string, bool>  */
     private $cachedFillable = [];
 
     /**
@@ -45,6 +49,10 @@ abstract class AbstractFactory
         $this->times = $times;
     }
 
+    /**
+     * @param array<string, mixed> $attributes
+     * @return array<mixed>|mixed
+     */
     final public function store(array $attributes = [])
     {
         $entities = $this->makeEntities($attributes);
@@ -61,6 +69,11 @@ abstract class AbstractFactory
         return $this->newCollection($entities);
     }
 
+    /**
+     * @param array<string, mixed> $attributes
+     * @return array<mixed>
+     * @throws ReflectionException
+     */
     private function makeEntities(array $attributes): array
     {
         $faker = $this->getFaker();
@@ -81,9 +94,9 @@ abstract class AbstractFactory
     }
 
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      * @return mixed
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function makeEntity(array $attributes)
     {
@@ -100,17 +113,25 @@ abstract class AbstractFactory
         return $instance;
     }
 
+    /**
+     * @phpstan-return class-string
+     * @return string
+     */
     abstract protected function class(): string;
 
+    /**
+     * @param array<string, mixed> $attributes
+     * @return array<string, mixed>
+     */
     private function buildAttributes(Faker $faker, array $attributes): array
     {
         $currentAttributes = [];
 
         $recipes[] = new Recipe($this->default($faker));
+        /** @var Recipe[] $recipes */
         $recipes = array_merge($recipes, $this->recipes);
         $recipes[] = new Recipe($attributes);
 
-        /** @var Recipe[] $recipes */
         foreach ($recipes as $recipe) {
             $cooked = $recipe->toAttribute($faker, $currentAttributes);
 
@@ -124,6 +145,9 @@ abstract class AbstractFactory
         return $currentAttributes;
     }
 
+    /**
+     * @param array<string, mixed> $attributes
+     */
     private function checkAttributes(array $attributes): void
     {
         foreach ($attributes as $key => $attribute) {
@@ -150,11 +174,17 @@ abstract class AbstractFactory
         return $this->fillable()[0] !== '*';
     }
 
+    /**
+     * @return string[]
+     */
     protected function fillable(): array
     {
         return ['*'];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     abstract protected function default(Faker $faker): array;
 
     final protected function shouldReturnMultiple(): bool
@@ -162,18 +192,25 @@ abstract class AbstractFactory
         return $this->times !== 1;
     }
 
+    /**
+     * @param mixed $entity
+     */
     protected function persistEntity($entity): void
     {
         throw new LogicException('should override this method if you want to persist an entity.');
     }
 
+    /**
+     * @param array<mixed> $entities
+     * @return mixed
+     */
     protected function newCollection(array $entities)
     {
         return $entities;
     }
 
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      * @return mixed
      */
     final public function make(array $attributes = [])
@@ -184,6 +221,10 @@ abstract class AbstractFactory
             : $entities[0];
     }
 
+    /**
+     * @param array<string, mixed> $attributes
+     * @return array<string, mixed>|array<mixed>
+     */
     final public function attributes(array $attributes = []): array
     {
         $times = $this->times;
@@ -198,7 +239,7 @@ abstract class AbstractFactory
     }
 
     /**
-     * @param array|callable $attribute
+     * @param array<string, mixed>|callable $attribute
      */
     final protected function addRecipe($attribute): void
     {
